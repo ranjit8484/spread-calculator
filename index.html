@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spread Risk/Reward Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background: #f8f9fa;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+    }
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    button {
+      margin-top: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .result {
+      margin-top: 2rem;
+      background: #e9ecef;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Spread Risk/Reward Calculator</h2>
+    <label for="spreadWidth">Spread Width ($):</label>
+    <input type="number" id="spreadWidth" step="0.01" />
+
+    <label for="credit">Credit Received ($):</label>
+    <input type="number" id="credit" step="0.01" />
+
+    <button onclick="calculate()">Calculate</button>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    function calculate() {
+      const spreadWidth = parseFloat(document.getElementById("spreadWidth").value);
+      const credit = parseFloat(document.getElementById("credit").value);
+
+      if (isNaN(spreadWidth) || isNaN(credit) || credit > spreadWidth) {
+        document.getElementById("result").innerHTML =
+          '<p style="color: red;">Please enter valid numbers. Credit must be less than or equal to spread width.</p>';
+        return;
+      }
+
+      const risk = (spreadWidth - credit).toFixed(2);
+      const rrRatio = (credit / (spreadWidth - credit)).toFixed(2);
+      const premiumPct = ((credit / spreadWidth) * 100).toFixed(1);
+
+      let pop = "";
+      if (premiumPct <= 25) pop = "~80–85%";
+      else if (premiumPct <= 40) pop = "~70–75%";
+      else if (premiumPct <= 50) pop = "~60–65%";
+      else if (premiumPct <= 65) pop = "~50–55%";
+      else if (premiumPct <= 80) pop = "~35–45%";
+      else pop = "<35% (very risky)";
+
+      document.getElementById("result").innerHTML = `
+        <h3>Results</h3>
+        <p><strong>Spread Width:</strong> $${spreadWidth}</p>
+        <p><strong>Credit Received:</strong> $${credit}</p>
+        <p><strong>Max Risk:</strong> $${risk}</p>
+        <p><strong>Risk/Reward Ratio:</strong> ${rrRatio}:1</p>
+        <p><strong>Premium % of Spread:</strong> ${premiumPct}%</p>
+        <p><strong>Estimated Probability of Profit:</strong> ${pop}</p>
+      `;
+    }
+  </script>
+</body>
+</html>
