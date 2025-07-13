@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Spread Risk/Reward Calculator</title>
   <style>
     body {
@@ -16,7 +16,7 @@
       background: #fff;
       padding: 2rem;
       border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
     label {
       display: block;
@@ -56,6 +56,9 @@
     <label for="credit">Credit Received ($):</label>
     <input type="number" id="credit" step="0.01" />
 
+    <label for="dte">Days to Expiry (DTE):</label>
+    <input type="number" id="dte" step="1" />
+
     <button onclick="calculate()">Calculate</button>
 
     <div class="result" id="result"></div>
@@ -65,6 +68,7 @@
     function calculate() {
       const spreadWidth = parseFloat(document.getElementById("spreadWidth").value);
       const credit = parseFloat(document.getElementById("credit").value);
+      const dte = parseInt(document.getElementById("dte").value);
 
       if (isNaN(spreadWidth) || isNaN(credit) || credit > spreadWidth) {
         document.getElementById("result").innerHTML =
@@ -84,6 +88,31 @@
       else if (premiumPct <= 80) pop = "~35–45%";
       else pop = "<35% (very risky)";
 
+      let advice = "";
+      if (credit < 1) {
+        advice = "⚠️ Credit is very low. Consider widening spread or skipping this trade.";
+      } else if (rrRatio < 0.5) {
+        advice = "🚫 Risk is too high for the reward. Look for better R/R or higher credit.";
+      } else if (premiumPct >= 70) {
+        advice = "⚠️ Very aggressive. Only enter if you have high directional conviction. Manage closely.";
+      } else if (pop.includes("~80")) {
+        advice = "✅ Conservative setup. Consider exiting at 50–60% profit to lock in gains.";
+      } else if (pop.includes("~70")) {
+        advice = "✅ High probability trade. Exit early if profit reaches 60–70%.";
+      } else if (pop.includes("~60")) {
+        advice = "✅ Balanced trade. Watch for reversal and exit at 70–80% profit.";
+      } else if (pop.includes("~50") || pop.includes("~35")) {
+        advice = "⚠️ Risky setup. Only take if trend strongly supports your direction. Exit early on profit.";
+      } else {
+        advice = "ℹ️ Neutral setup. Monitor closely and adjust if price nears strike.";
+      }
+
+      if (!isNaN(dte) && dte <= 3) {
+        advice += " <br/>⚠️ Short DTE: High gamma risk. Avoid unless you're experienced.";
+      } else if (!isNaN(dte) && dte >= 30) {
+        advice += " <br/>ℹ️ Long DTE: Lower theta decay but more time exposure. Consider 15–25 DTE for balance.";
+      }
+
       document.getElementById("result").innerHTML = `
         <h3>Results</h3>
         <p><strong>Spread Width:</strong> $${spreadWidth}</p>
@@ -92,6 +121,8 @@
         <p><strong>Risk/Reward Ratio:</strong> ${rrRatio}:1</p>
         <p><strong>Premium % of Spread:</strong> ${premiumPct}%</p>
         <p><strong>Estimated Probability of Profit:</strong> ${pop}</p>
+        <hr/>
+        <p><strong>💡 Guidance:</strong> ${advice}</p>
       `;
     }
   </script>
